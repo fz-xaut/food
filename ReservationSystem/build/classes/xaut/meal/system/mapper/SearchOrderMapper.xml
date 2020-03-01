@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xaut.meal.system.mapper.SearchOrderMapper">
+	<select id="getOrderNotReceive" parameterType="orderoutdb" resultType="OrderOutDB">
+		select
+			a.`order_id`,
+			a.`time` `order_time`,
+			b.`food_sell_window`,
+			b.`food_name`,
+			b.`food_taste`,
+			b.`food_price`,
+			c.`stu_name` `stuName`,
+			c.`stu_call` `stuCall`,
+			c.`stu_address` `stuAddress`
+		from `order` a
+			LEFT join `food` b on b.`food_id` = a.`food_id`
+			LEft Join `student` c ON c.`stu_no` = a.`stu_no`
+		where a.`dispose` = "N"
+		LIMIT #{start}, #{rows};
+	</select>
+
+	<select id="getCountOrder" parameterType="orderoutdb" resultType="int">
+		select count(1)
+		from `reservationsystem`.`order`
+		where `dispose` = "N"
+	</select>
+	<select id="getOrderIsNotAlive" parameterType="string" resultType="String">
+		SELECT 
+		  `order_id` 
+		FROM
+		  `reservationsystem`.`order` 
+		WHERE `order_id` = #{order_id}
+		AND `dispose` = "N"
+	</select>
+	
+	<select id="getOrderByReceive" parameterType="string" resultType="MyOrder">
+		SELECT
+		  f.`food_name` `foodName`,
+		  f.`food_sell_window` `foodSellWindow`,
+		  f.`food_price` `foodPrice`,
+		  f.`food_taste` `foodTaste`,
+		  s.`stu_name` `stuName`,
+		  s.`stu_call` `stuCall`,
+		  o.`order_id` `orderId`
+		FROM `order` o
+			LEFT JOIN `food` f ON f.`food_id` = o.`food_id`
+			LEFT JOIN `student` s ON s.`stu_no` = o.`stu_no`
+		WHERE `order_receive` = #{receive} AND `finish` = "N"
+	</select>
+	<update id="consealOrder" parameterType="string">
+		UPDATE 
+		  `reservationsystem`.`order` 
+		SET
+		  `dispose` = 'N' ,
+		  `order_receive` = NULL
+		WHERE `order_id` = #{orderId}
+		  AND `finish` = 'N'
+	</update>
+
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xaut.meal.system.mapper.PersonalMapper">
+	<select id="loginVerify" parameterType="String" resultType="student">
+		SELECT 
+		  `stu_no` `stuNo`,
+		  `stu_name` `stuName`,
+		  `stu_call` `stuCall`,
+		  `stu_address` `stuAddress`,
+		  `password`
+		FROM
+		  `reservationsystem`.`student`
+		WHERE 
+		  `stu_name` = #{stuName}
+	</select>
+	<insert id="sign" parameterType="student">
+		INSERT INTO `reservationsystem`.`student`
+            (`stu_no`,
+             `stu_name`,
+             `stu_call`,
+             `stu_address`,
+             `password`)
+		VALUES (#{stuNo},#{stuName},#{stuCall},#{stuAddress},#{password});
+	</insert>
+	<update id="change" parameterType="student">
+		update `reservationsystem`.`student`
+		set
+		  `stu_name` = #{stuName},
+		  `stu_call` = #{stuCall},
+		  `stu_address` = #{stuAddress},
+		  `password` = #{password}
+		where `stu_no` = #{stuNo};
+	</update>
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<!-- jdbc.properties -->
+	<context:property-placeholder
+		location="classpath:jdbc.properties" />
+
+	<!-- master -->
+	<bean id="MasterDataSource"
+		class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName"
+			value="${jdbc.driver.master}" />
+		<property name="url" value="${jdbc.url.master}" />
+		<property name="username" value="${jdbc.username.master}" />
+		<property name="password" value="${jdbc.password.master}" />
+	</bean>
+	<!-- slave -->
+	<bean id="SlaveDataSource"
+		class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName" value="${jdbc.driver.slave}" />
+		<property name="url" value="${jdbc.url.slave}" />
+		<property name="username" value="${jdbc.username.slave}" />
+		<property name="password" value="${jdbc.password.slave}" />
+	</bean>
+
+	<!-- 自定义数据源,引用master和slave -->
+	<bean id="dataSource"
+		class="xaut.meal.system.DataSourceAspect.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="master" value-ref="MasterDataSource"></entry>
+				<entry key="slave" value-ref="SlaveDataSource"></entry>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource"
+			ref="MasterDataSource" />
+	</bean>
+
+
+	<!-- SqlSessionFactory -->
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 配置MyBatis核心配置文件 -->
+		<property name="configLocation"
+			value="classpath:SqlMapConfig.xml" />
+		<!-- 设置数据源 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 别名包扫描 -->
+		<property name="typeAliasesPackage"
+			value="xaut.meal.system.pojo" />
+	</bean>
+
+	<!-- Mapper -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 设置Mapper扫描包 -->
+		<property name="basePackage" value="xaut.meal.system.mapper" />
+	</bean>
+	
+
+    <!-- 初始化Jedis连接池-->
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <!--最大连接数, 默认8个-->
+        <property name="maxTotal" value="6000" />
+        <!--最大空闲连接数, 默认8-->
+        <property name="maxIdle" value="10" />
+        <!--连接时的最大等待毫秒数-->
+        <property name="maxWaitMillis" value="10" />
+        <!--获得一个jedis实例的时候是否检查连接可用性-->
+        <property name="testOnBorrow" value="true" />
+    </bean>
+    <!-- 把jedisPool交给spring管理 -->
+    <bean   class="redis.clients.jedis.JedisPool" >
+        <constructor-arg name="poolConfig" ref="poolConfig"></constructor-arg>
+        <constructor-arg name="host" value="127.0.0.1"></constructor-arg>
+        <constructor-arg name="port" value="6379"></constructor-arg>
+    </bean>
+
+</beans>

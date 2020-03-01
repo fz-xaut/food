@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xaut.meal.system.mapper.SearchFoodMapper">
+
+	<sql id="food_where">
+		<where>
+			<if test="fName != null and fName != ''">
+				and `food_name` LIKE '%${fName}%'
+			</if>
+			<if test="fWindow != null and fWindow != ''">
+				and `food_sell_window` = #{fWindow}
+			</if>
+			<if test="fTaste != null and fTaste != ''">
+				and `food_taste` = #{fTaste}
+			</if>
+			<if test="fPrice != null and fPrice != ''">
+				and `food_price` = #{fPrice}
+			</if>
+			<if test="fId != null and fId != ''">
+				and `food_id` LIKE '${fId}%'
+			</if>
+		</where>
+	</sql>
+	<sql id="fid_where">
+		<where>
+			<if test="fId != null and fId != ''">
+				and `food_id` LIKE '${fId}%'
+			</if>
+		</where>
+	</sql>
+	
+	<select id="getAllFood" parameterType="queryvo" resultType="food">
+		select 
+		  `food_sell_window`,
+		  `food_id`,
+		  `food_name`,
+		  `food_taste`,
+		  `food_price` 
+		from
+		  `reservationsystem`.`food`
+		<include refid="food_where"/>
+	</select>
+	<select id="getCountByQueryVo" parameterType="queryvo" resultType="int">
+		select count(1)
+		from
+		  `reservationsystem`.`food`
+		<include refid="food_where"/>
+	</select>
+	
+	<select id="getWindow" parameterType="QueryVo" resultType="String">
+		SELECT 
+		  `food_sell_window`
+		FROM
+		  `reservationsystem`.`food`
+		<include refid="fid_where"/>
+		GROUP BY  `food_sell_window`
+	</select>
+	
+	<select id="getTaste" parameterType="QueryVo" resultType="String">
+		select 
+		  `food_taste`
+		from
+		  `reservationsystem`.`food`
+		<include refid="fid_where"/>
+		GROUP BY  `food_taste`
+	</select>
+	
+	<select id="getPrice" parameterType="QueryVo" resultType="String">
+		select 
+		  `food_price` 
+		from
+		  `reservationsystem`.`food`
+		<include refid="fid_where"/>
+		GROUP BY  `food_price`
+	</select>
+	<select id="getOrderByUser" parameterType="String" resultType="MyOrder">
+		SELECT
+		  o.`order_id` `orderId`,
+		  f.`food_sell_window` `foodSellWindow`,
+		  f.`food_name` `foodName`,
+		  f.`food_taste` `foodTaste`,
+		  f.`food_price` `foodPrice`,
+		  s.`stu_name` `stuName`,
+		  s.`stu_call` `stuCall` 
+		FROM `order` o
+		  LEFT JOIN `food` f ON f.`food_id` = o.`food_id`
+		  LEFT JOIN `student` s ON s.`stu_no` = o.`order_receive`
+		WHERE o.`stu_no` = #{user} and o.`finish` = 'N'
+	</select>
+	
+	<update id="confirmOrder" parameterType="string">
+		update `reservationsystem`.`order`
+		set 
+		  `finish` = 'Y'
+		where `order_id` = #{orderId}
+	</update>
+	
+	<update id="consealFood" parameterType="string">
+		UPDATE 
+		  `reservationsystem`.`order` 
+		SET
+		  `finish` = 'Y',
+		  `dispose` = 'Y' 
+		WHERE `order_id` = #{orderId} 
+		  AND ISNULL(`order_receive`)
+	</update>
+	
+</mapper>

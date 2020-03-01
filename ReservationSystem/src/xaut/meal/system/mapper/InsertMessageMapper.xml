@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xaut.meal.system.mapper.InsertMessageMapper">
+	<insert id="insertMessage" parameterType="OrderInDB">
+		INSERT INTO `reservationsystem`.`order` (`food_id`, `stu_no` ,`dispose`, `finish`) 
+		VALUES
+		  (#{food_id}, #{stu_no}, #{dispose}, #{finish}) ;
+	</insert>
+	<update id="updateOrder" parameterType="ordersubmit">
+		update 
+		  `reservationsystem`.`order` 
+		set
+		  `dispose` = "Y",
+		  `order_receive` = #{order_receive}
+		where `order_id` = #{order_id} ;
+	</update>
+</mapper>
